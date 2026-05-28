@@ -19,7 +19,7 @@ import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { routeModule } from "next/dist/build/templates/pages";
+import { FaGoogle, FaGithub } from "react-icons/fa";
 
 const formSchema = z
   .object({
@@ -45,7 +45,25 @@ export default function SignUpView() {
       confirmPassword: "",
     },
   });
-
+  const onSocial = (provider: "github" | "google") => {
+    setError(null);
+    setPending(true);
+    authClient.signIn.social(
+      {
+        provider: provider,
+      },
+      {
+        onSuccess: () => {
+          setPending(false);
+          router.push("/");
+        },
+        onError: ({ error }) => {
+          setPending(false);
+          setError(error.message);
+        },
+      },
+    );
+  };
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setError(null);
     setPending(true);
@@ -169,11 +187,19 @@ export default function SignUpView() {
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <Button variant="outline" type="button" className="w-full">
-                    Google
+                  <Button
+                    onClick={() => onSocial("google")}
+                    variant="outline"
+                    type="button"
+                    className="w-full">
+                    <FaGoogle />
                   </Button>
-                  <Button variant="outline" type="button" className="w-full">
-                    Github
+                  <Button
+                    onClick={() => onSocial("github")}
+                    variant="outline"
+                    type="button"
+                    className="w-full">
+                    <FaGithub />
                   </Button>
                 </div>
                 <div className="text-center text-sm">
@@ -187,7 +213,7 @@ export default function SignUpView() {
               </div>
             </form>
           </Form>
-          <div className="bg-radial from-blue-700 to-blue-900 relative hidden md:flex flex-col gap-y-4 items-center justify-center">
+          <div className="bg-radial from-blue-800 to-sidebar  relative hidden md:flex flex-col gap-y-4 items-center justify-center">
             <img src="/logo.svg" alt="logo" className="h-[92px] w-[92px]" />
             <p className="text-2xl font-semibold text-white">Cliento.AI</p>
           </div>
