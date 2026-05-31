@@ -13,7 +13,14 @@ import {
 } from "@/components/ui/dialog";
 import { InputGroup, InputGroupAddon } from "@/components/ui/input-group";
 import { SearchIcon, CheckIcon } from "lucide-react";
-
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "./drawer";
 function Command({
   className,
   ...props
@@ -176,7 +183,50 @@ function CommandShortcut({
     />
   );
 }
-
+function CommandResponsiveDialog({
+  title = "Command Palette",
+  description = "Search for a command to run...",
+  children,
+  className,
+  showCloseButton = false,
+  ...props
+}: React.ComponentProps<typeof Dialog> & {
+  title?: string;
+  description?: string;
+  className?: string;
+  showCloseButton?: boolean;
+}) {
+  const isMobile = useIsMobile();
+  if (isMobile) {
+    return (
+      <Drawer {...props}>
+        <DrawerContent className="overflow-hidden p-0">
+          <DrawerHeader className="sr-only">
+            <DrawerTitle>{title}</DrawerTitle>
+            <DrawerDescription>{description}</DrawerDescription>
+          </DrawerHeader>
+          <Command className="">{children}</Command>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+  return (
+    <Dialog {...props}>
+      <DialogHeader className="sr-only">
+        <DialogTitle>{title}</DialogTitle>
+        <DialogDescription>{description}</DialogDescription>
+      </DialogHeader>
+      <DialogContent
+        className={cn(
+          "top-1/3 translate-y-0 overflow-hidden rounded-xl! p-0",
+          className,
+        )}
+        showCloseButton={showCloseButton}>
+        <Command>{children}</Command>
+      </DialogContent>
+    </Dialog>
+  );
+}
 export {
   Command,
   CommandDialog,
@@ -187,4 +237,5 @@ export {
   CommandItem,
   CommandShortcut,
   CommandSeparator,
+  CommandResponsiveDialog,
 };
