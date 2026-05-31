@@ -2,13 +2,10 @@
 
 import { ErrorState } from "@/components/error-state";
 
-const ErrorPage = () => {
+export default function ErrorPage() {
   return (
     <ErrorState
-      title="Failed to load agents"
-      description="Please try again later."
-    />
+      title="Error Loading Agents"
+      description="Something went wrong"></ErrorState>
   );
-};
-
-export default ErrorPage;
+}
