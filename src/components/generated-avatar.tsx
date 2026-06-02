@@ -16,6 +16,7 @@ export const GeneratedAvatar = ({
   variant,
 }: GeneratedAvatarProps) => {
   let avatar;
+
   if (variant === "botttsNeutral") {
     avatar = createAvatar(botttsNeutral, {
       seed,
@@ -27,6 +28,7 @@ export const GeneratedAvatar = ({
       fontSize: 42,
     });
   }
+
   return (
     <Avatar className={cn(className)}>
       <AvatarImage src={avatar.toDataUri()} alt="Avatar" />

@@ -3,7 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { and, count, desc, eq, getTableColumns, ilike, sql } from "drizzle-orm";
 
 import { db } from "@/db";
-import { agents } from "@/db/schema";
+import { meetings } from "@/db/schema";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import {
   DEFAULT_PAGE,
@@ -11,79 +11,62 @@ import {
   MAX_PAGE_SIZE,
   MIN_PAGE_SIZE,
 } from "@/constants";
+import { meetingsInsertSchema, meetingsUpdateSchema } from "../schemas";
 
-import { agentsInsertSchema, agentsUpdateSchema } from "../schemas";
-
-export const agentsRouter = createTRPCRouter({
+export const meetingsRouter = createTRPCRouter({
   create: protectedProcedure
-    .input(agentsInsertSchema)
+    .input(meetingsInsertSchema)
     .mutation(async ({ ctx, input }) => {
-      const [createdAgent] = await db
-        .insert(agents)
+      const [createdMeeting] = await db
+        .insert(meetings)
         .values({
           ...input,
           userId: ctx.auth.user.id,
         })
         .returning();
 
-      return createdAgent;
+      return createdMeeting;
+      //TODO: Create Stream Call, Upsert Stream Users
     }),
   update: protectedProcedure
-    .input(agentsUpdateSchema)
+    .input(meetingsUpdateSchema)
     .mutation(async ({ ctx, input }) => {
       const { id, ...values } = input;
-      const [updatedAgent] = await db
-        .update(agents)
+      const [updatedMeeting] = await db
+        .update(meetings)
         .set(values)
-        .where(and(eq(agents.id, id), eq(agents.userId, ctx.auth.user.id)))
+        .where(and(eq(meetings.id, id), eq(meetings.userId, ctx.auth.user.id)))
         .returning();
 
-      if (!updatedAgent) {
+      if (!updatedMeeting) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Agent not found",
         });
       }
 
-      return updatedAgent;
-    }),
-  remove: protectedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const [removedAgent] = await db
-        .delete(agents)
-        .where(
-          and(eq(agents.id, input.id), eq(agents.userId, ctx.auth.user.id)),
-        )
-        .returning();
-
-      if (!removedAgent) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Agent not found",
-        });
-      }
-
-      return removedAgent;
+      return updatedMeeting;
     }),
   getOne: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
-      const [existingAgent] = await db
+      const [existingMeeting] = await db
         .select({
-          ...getTableColumns(agents),
-          meetingCount: sql<number>`0`,
+          ...getTableColumns(meetings),
         })
-        .from(agents)
+        .from(meetings)
         .where(
-          and(eq(agents.id, input.id), eq(agents.userId, ctx.auth.user.id)),
+          and(eq(meetings.id, input.id), eq(meetings.userId, ctx.auth.user.id)),
         );
 
-      if (!existingAgent) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Agent not found" });
+      if (!existingMeeting) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Meeting not found",
+        });
       }
 
-      return existingAgent;
+      return existingMeeting;
     }),
   getMany: protectedProcedure
     .input(
@@ -102,27 +85,26 @@ export const agentsRouter = createTRPCRouter({
 
       const data = await db
         .select({
-          ...getTableColumns(agents),
-          meetingCount: sql<number>`0`,
+          ...getTableColumns(meetings),
         })
-        .from(agents)
+        .from(meetings)
         .where(
           and(
-            eq(agents.userId, ctx.auth.user.id),
-            search ? ilike(agents.name, `%${search}%`) : undefined,
+            eq(meetings.userId, ctx.auth.user.id),
+            search ? ilike(meetings.name, `%${search}%`) : undefined,
           ),
         )
-        .orderBy(desc(agents.createdAt), desc(agents.id))
+        .orderBy(desc(meetings.createdAt), desc(meetings.id))
         .limit(pageSize)
         .offset((page - 1) * pageSize);
 
       const [total] = await db
         .select({ count: count() })
-        .from(agents)
+        .from(meetings)
         .where(
           and(
-            eq(agents.userId, ctx.auth.user.id),
-            search ? ilike(agents.name, `%${search}%`) : undefined,
+            eq(meetings.userId, ctx.auth.user.id),
+            search ? ilike(meetings.name, `%${search}%`) : undefined,
           ),
         );
 

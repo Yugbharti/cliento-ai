@@ -9,8 +9,13 @@ import ListHeader from "@/modules/agents/ui/components/list-header";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { loadSearchParams } from "@/modules/agents/params";
 
-const page = async () => {
+interface PageProps {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+const page = async ({ searchParams }: PageProps) => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -18,8 +23,9 @@ const page = async () => {
   if (!session) {
     redirect("/auth/sign-in");
   }
+  const filters = await loadSearchParams(searchParams);
   const queryClient = getQueryClient();
-  await queryClient.prefetchQuery(trpc.agents.getMany.queryOptions());
+  await queryClient.prefetchQuery(trpc.agents.getMany.queryOptions(filters));
   return (
     <>
       <ListHeader />

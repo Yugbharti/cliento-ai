@@ -3,6 +3,7 @@ import { Roboto, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { TRPCReactProvider } from "@/trpc/client";
 import { Toaster } from "@/components/ui/sonner";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -20,12 +21,14 @@ export default function RootLayout({
 }>) {
   return (
     <TRPCReactProvider>
-      <html lang="en" className={`${roboto.className} h-full antialiased`}>
-        <body className="min-h-full flex flex-col">
-          <Toaster />
-          {children}
-        </body>
-      </html>
+      <NuqsAdapter>
+        <html lang="en" className={`${roboto.className} h-full antialiased`}>
+          <body className="min-h-full flex flex-col">
+            <Toaster />
+            {children}
+          </body>
+        </html>
+      </NuqsAdapter>
     </TRPCReactProvider>
   );
 }
