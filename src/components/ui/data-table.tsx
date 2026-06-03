@@ -73,11 +73,8 @@ export function DataTable<TData, TValue>({
               <TableCell
                 colSpan={columns.length}
                 className="h-19 text-center text-muted-foreground">
-                <h1>There are no Agents.</h1>
-                <h5>
-                  Create your first agent and each agent will follow your
-                  instructions.
-                </h5>
+                <h1>There are no Meetings.</h1>
+                <h5>Create your first Meeting.</h5>
               </TableCell>
             </TableRow>
           )}
